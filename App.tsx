@@ -62,15 +62,17 @@ export default function App() {
   const placeOrder = () => {
     setOrderPlaced(true);
     setCart({});
-    setTimeout(() => {
-      setOrderPlaced(false);
-      setShowCart(false);
-    }, 2200);
+  };
+
+  const closeCart = () => {
+    setShowCart(false);
+    setOrderPlaced(false);
   };
 
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
+      <View style={styles.frame}>
 
       <View style={styles.header}>
         <View>
@@ -126,12 +128,13 @@ export default function App() {
           cart={cart}
           total={cartTotal}
           orderPlaced={orderPlaced}
-          onClose={() => setShowCart(false)}
+          onClose={closeCart}
           onAdd={addToCart}
           onRemove={removeFromCart}
           onPlaceOrder={placeOrder}
         />
       )}
+      </View>
     </SafeAreaView>
   );
 }
@@ -301,6 +304,9 @@ function CartScreen({
             <Text style={styles.orderEmoji}>🎉</Text>
             <Text style={styles.orderTitle}>Order placed!</Text>
             <Text style={styles.orderSub}>Your food is on the way.</Text>
+            <Pressable style={styles.doneButton} onPress={onClose} testID="done-button">
+              <Text style={styles.checkoutText}>Done</Text>
+            </Pressable>
           </View>
         ) : lines.length === 0 ? (
           <View style={styles.orderConfirm}>
@@ -357,6 +363,7 @@ function CartScreen({
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
+  frame: { flex: 1, width: '100%', maxWidth: 480, alignSelf: 'center' },
   header: {
     backgroundColor: colors.primary,
     paddingHorizontal: spacing.lg,
@@ -534,4 +541,12 @@ const styles = StyleSheet.create({
   orderEmoji: { fontSize: 56 },
   orderTitle: { fontSize: 22, fontWeight: '900', color: colors.text, marginTop: spacing.md },
   orderSub: { fontSize: 15, color: colors.textMuted, marginTop: spacing.xs },
+  doneButton: {
+    backgroundColor: colors.primary,
+    borderRadius: 16,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xl * 2,
+    alignItems: 'center',
+    marginTop: spacing.xl,
+  },
 });
