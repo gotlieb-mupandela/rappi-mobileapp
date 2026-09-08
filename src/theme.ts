@@ -26,6 +26,7 @@ export type Theme = {
   tabBar: string;
   searchBtn: string;
   heroOverlay: string;
+  mediaBg: string;
 };
 
 export const lightTheme: Theme = {
@@ -36,8 +37,8 @@ export const lightTheme: Theme = {
   surface2: '#E8EBE3',
   text: '#121512',
   textSecondary: '#1C211C',
-  muted: '#5C6458',
-  muted2: '#7A8274',
+  muted: '#4F564C',
+  muted2: '#6E7668',
   accent: '#1DB954',
   accentBright: '#22C55E',
   accentDim: '#15803D',
@@ -54,34 +55,36 @@ export const lightTheme: Theme = {
   tabBar: '#FFFFFF',
   searchBtn: '#1DB954',
   heroOverlay: 'rgba(5, 5, 5, 0.45)',
+  mediaBg: '#ECEFE8',
 };
 
 export const darkTheme: Theme = {
   name: 'dark',
-  bg: '#050505',
-  elevated: '#0C0C0C',
-  surface: '#121212',
-  surface2: '#1A1A1A',
-  text: '#F5F5F5',
-  textSecondary: '#E4E4E4',
-  muted: '#9A9A9A',
-  muted2: '#6E6E6E',
-  accent: '#5EFF38',
-  accentBright: '#8DFF6A',
-  accentDim: '#3CC922',
-  accentMuted: 'rgba(94, 255, 56, 0.12)',
-  onAccent: '#071007',
-  border: 'rgba(255, 255, 255, 0.08)',
-  borderStrong: 'rgba(255, 255, 255, 0.14)',
-  danger: '#E23B4A',
-  warn: '#E8A317',
-  ok: '#8FD14F',
-  shadow: 'rgba(0, 0, 0, 0.5)',
-  chrome: '#080808',
-  headerBg: '#080808',
-  tabBar: '#0C0C0C',
-  searchBtn: '#5EFF38',
-  heroOverlay: 'rgba(0, 0, 0, 0.35)',
+  bg: '#0B0B0B',
+  elevated: '#111111',
+  surface: '#161616',
+  surface2: '#1C1C1C',
+  text: '#F7F7F7',
+  textSecondary: '#E8E8E8',
+  muted: '#B0B0B0',
+  muted2: '#7A7A7A',
+  accent: '#B6FF00',
+  accentBright: '#D4FF4D',
+  accentDim: '#8BCC00',
+  accentMuted: 'rgba(182, 255, 0, 0.14)',
+  onAccent: '#0B0B0B',
+  border: 'rgba(255, 255, 255, 0.10)',
+  borderStrong: 'rgba(255, 255, 255, 0.18)',
+  danger: '#FF4D5E',
+  warn: '#F0B429',
+  ok: '#B6FF00',
+  shadow: 'rgba(0, 0, 0, 0.55)',
+  chrome: '#0B0B0B',
+  headerBg: '#0B0B0B',
+  tabBar: '#0B0B0B',
+  searchBtn: '#B6FF00',
+  heroOverlay: 'rgba(0, 0, 0, 0.42)',
+  mediaBg: '#141414',
 };
 
 export const spacing = {

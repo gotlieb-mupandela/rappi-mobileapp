@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { DEMO_EMAIL, DEMO_PASSWORD, TAGLINE } from '../catalog';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { DEMO_EMAIL, DEMO_PASSWORD } from '../catalog';
+import { BrandLogo } from '../components/BrandLogo';
 import { ScreenHeader } from '../components/ScreenHeader';
+import { hapticSuccess, hapticTap } from '../haptics';
 import { useStore } from '../store';
-import { brandAssets, radius } from '../theme';
+import { radius } from '../theme';
 
 export function AuthScreen() {
   const { theme, login, continueGuest, pop, resetToTabs, showToast } = useStore();
@@ -14,8 +16,7 @@ export function AuthScreen() {
     <View style={{ flex: 1, backgroundColor: theme.bg }}>
       <ScreenHeader title="Sign in" />
       <View style={styles.body}>
-        <Image source={brandAssets.logo} style={styles.logo} resizeMode="contain" />
-        <Text style={[styles.tag, { color: theme.accent }]}>{TAGLINE}</Text>
+        <BrandLogo variant="lockup" width={200} />
         <Text style={[styles.h1, { color: theme.text }]}>Sign in</Text>
         <Text style={{ color: theme.muted, marginTop: 6, textAlign: 'center' }}>
           Demo shop login. Guests can browse and check out without an account.
@@ -38,10 +39,12 @@ export function AuthScreen() {
         <Pressable
           onPress={() => {
             const result = login(email, password);
+            if (result.ok) hapticSuccess();
+            else hapticTap();
             showToast(result.ok ? 'ok' : 'err', result.message);
             if (result.ok) resetToTabs('me');
           }}
-          style={[styles.cta, { backgroundColor: theme.accent }]}
+          style={({ pressed }) => [styles.cta, { backgroundColor: theme.accent, opacity: pressed ? 0.88 : 1 }]}
           testID="auth-submit"
         >
           <Text style={{ color: theme.onAccent, fontWeight: '900' }}>Sign in</Text>
@@ -52,10 +55,11 @@ export function AuthScreen() {
         <Pressable
           onPress={() => {
             continueGuest();
+            hapticTap();
             showToast('ok', 'Continuing as guest.');
             pop();
           }}
-          style={[styles.ghost, { borderColor: theme.borderStrong }]}
+          style={({ pressed }) => [styles.ghost, { borderColor: theme.borderStrong, opacity: pressed ? 0.8 : 1 }]}
           testID="auth-guest"
         >
           <Text style={{ color: theme.text, fontWeight: '800' }}>Continue as guest</Text>
@@ -67,9 +71,7 @@ export function AuthScreen() {
 
 const styles = StyleSheet.create({
   body: { padding: 24, alignItems: 'center' },
-  logo: { width: 200, height: 80, backgroundColor: '#050505', borderRadius: radius.lg },
-  tag: { marginTop: 10, fontSize: 10, fontWeight: '800', letterSpacing: 2 },
-  h1: { fontSize: 32, fontWeight: '900', marginTop: 12 },
+  h1: { fontSize: 32, fontWeight: '900', marginTop: 16 },
   input: {
     alignSelf: 'stretch',
     borderWidth: 1,
@@ -77,14 +79,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 12,
     marginTop: 12,
+    minHeight: 48,
   },
-  cta: { alignSelf: 'stretch', marginTop: 16, borderRadius: radius.lg, paddingVertical: 14, alignItems: 'center' },
+  cta: { alignSelf: 'stretch', marginTop: 16, borderRadius: radius.lg, paddingVertical: 14, minHeight: 48, alignItems: 'center', justifyContent: 'center' },
   ghost: {
     alignSelf: 'stretch',
     marginTop: 14,
     borderRadius: radius.lg,
     paddingVertical: 14,
+    minHeight: 48,
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
   },
 });

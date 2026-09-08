@@ -9,18 +9,22 @@ import {
   Text,
   View,
 } from 'react-native';
-import { CATEGORIES, HERO_SLIDES, SPOTLIGHT_CODES, TAGLINE } from '../catalog';
+import { CATEGORIES, HERO_SLIDES, SPOTLIGHT_CODES } from '../catalog';
 import { newArrivals, sampleForCategory } from '../products';
+import { BrandLogo } from '../components/BrandLogo';
+import { HomeSkeleton } from '../components/Skeleton';
 import { SearchBar } from '../components/SearchBar';
 import { ProductCard } from '../components/ProductCard';
 import { ProductImage } from '../components/ProductImage';
 import { useStore } from '../store';
-import { brandAssets, radius } from '../theme';
+import { hapticTap } from '../haptics';
+import { radius } from '../theme';
 
 export function HomeScreen() {
   const { theme, catalog, catalogReady, catalogError, openProduct, openSearch, push } = useStore();
   const [q, setQ] = useState('');
   const [slide, setSlide] = useState(0);
+  const [heroW, setHeroW] = useState(398);
 
   const arrivals = useMemo(() => {
     const spotlight = SPOTLIGHT_CODES.map((c) => catalog.find((p) => p.code === c)).filter(Boolean);
@@ -43,12 +47,11 @@ export function HomeScreen() {
     <ScrollView
       style={{ flex: 1, backgroundColor: theme.bg }}
       contentContainerStyle={styles.content}
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
       testID="home-scroll"
     >
-      <View style={styles.logoWrap}>
-        <Image source={brandAssets.logo} style={styles.logo} resizeMode="contain" accessibilityLabel="RAPPI Sports Hub" />
-        <Text style={[styles.tagline, { color: theme.accent }]}>{TAGLINE}</Text>
-      </View>
+      <BrandLogo variant="lockup" width={236} style={styles.logo} />
 
       <SearchBar value={q} onChange={setQ} onSubmit={() => openSearch(q.trim())} />
 
@@ -57,19 +60,23 @@ export function HomeScreen() {
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={onHeroScroll}
+        onLayout={(e) => setHeroW(Math.round(e.nativeEvent.layout.width))}
         style={styles.heroPager}
         testID="home-hero"
       >
         {HERO_SLIDES.map((h) => (
           <Pressable
             key={h.id}
-            style={[styles.hero, { backgroundColor: '#0B0B0B' }]}
-            onPress={() => push({ key: 'categoryHub', slug: h.cat })}
+            style={({ pressed }) => [styles.hero, { width: heroW, backgroundColor: '#0B0B0B', opacity: pressed ? 0.92 : 1 }]}
+            onPress={() => {
+              hapticTap();
+              push({ key: 'categoryHub', slug: h.cat });
+            }}
             accessibilityRole="button"
             accessibilityLabel={h.title}
           >
             <Image source={h.image} style={styles.fill} resizeMode="cover" />
-            <View style={styles.heroShade} />
+            <View style={[styles.heroShade, { backgroundColor: theme.heroOverlay }]} />
             <Text style={styles.heroTitle}>{h.title}</Text>
             <Text style={styles.heroSub}>{h.subtitle}</Text>
           </Pressable>
@@ -87,72 +94,79 @@ export function HomeScreen() {
         ))}
       </View>
 
-      {!catalogReady ? (
-        <Text style={[styles.loading, { color: theme.muted }]}>Loading live catalog…</Text>
-      ) : catalogError ? (
+      {catalogError ? (
         <Text style={[styles.loading, { color: theme.danger }]}>{catalogError}</Text>
       ) : null}
 
       <View style={styles.sectionHead}>
         <Text style={[styles.section, { color: theme.text }]}>Shop</Text>
-        <Pressable onPress={() => openSearch('')}>
+        <Pressable
+          onPress={() => {
+            hapticTap();
+            openSearch('');
+          }}
+          hitSlop={8}
+          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+        >
           <Text style={{ color: theme.accent, fontWeight: '700' }}>Browse all ›</Text>
         </Pressable>
       </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.hubRow}>
-        {hubs.map((h) => {
-          const sample = sampleForCategory(catalog, h.slug);
-          return (
-            <Pressable
-              key={h.slug}
-              onPress={() => push({ key: 'categoryHub', slug: h.slug })}
-              style={[styles.hub, { backgroundColor: theme.surface, shadowColor: theme.shadow }]}
-              testID={`hub-${h.slug}`}
-            >
-              <View style={styles.hubImg}>
-                <ProductImage uri={sample?.imageUrl} height={88} />
-              </View>
-              <Text style={[styles.hubName, { color: theme.text }]} numberOfLines={1}>
-                {h.name}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
 
-      <Text style={[styles.section, { color: theme.text, marginTop: 8 }]}>New Arrivals</Text>
-      <View style={styles.grid}>
-        {arrivals.map((p) =>
-          p ? (
-            <ProductCard key={p.code} product={p} onPress={() => openProduct(p.code)} />
-          ) : null,
-        )}
-      </View>
+      {!catalogReady ? (
+        <HomeSkeleton />
+      ) : (
+        <>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.hubRow}>
+            {hubs.map((h) => {
+              const sample = sampleForCategory(catalog, h.slug);
+              return (
+                <Pressable
+                  key={h.slug}
+                  onPress={() => {
+                    hapticTap();
+                    push({ key: 'categoryHub', slug: h.slug });
+                  }}
+                  style={({ pressed }) => [
+                    styles.hub,
+                    { backgroundColor: theme.surface, borderColor: theme.border, shadowColor: theme.shadow, opacity: pressed ? 0.88 : 1 },
+                  ]}
+                  testID={`hub-${h.slug}`}
+                >
+                  <View style={styles.hubImg}>
+                    <ProductImage uri={sample?.imageUrl} height={88} />
+                  </View>
+                  <Text style={[styles.hubName, { color: theme.text }]} numberOfLines={1}>
+                    {h.name}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+
+          <Text style={[styles.section, { color: theme.text, marginTop: 8 }]}>New Arrivals</Text>
+          <View style={styles.grid}>
+            {arrivals.map((p) =>
+              p ? (
+                <ProductCard key={p.code} product={p} onPress={() => openProduct(p.code)} />
+              ) : null,
+            )}
+          </View>
+        </>
+      )}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  content: { padding: 16, paddingBottom: 32 },
-  logoWrap: { alignItems: 'center', marginBottom: 14 },
-  logo: { width: 220, height: 88, backgroundColor: '#050505', borderRadius: radius.lg },
-  tagline: {
-    marginTop: 8,
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 2.2,
-    textTransform: 'uppercase',
-  },
+  content: { padding: 16, paddingBottom: 36 },
+  logo: { marginBottom: 16 },
   heroPager: { marginTop: 16, height: 168, borderRadius: radius.xl, overflow: 'hidden' },
   hero: {
-    width: 398,
-    maxWidth: '100%',
     height: 168,
     borderRadius: radius.xl,
     padding: 20,
     justifyContent: 'flex-end',
     overflow: 'hidden',
-    marginRight: 0,
   },
   heroShade: {
     position: 'absolute',
@@ -160,9 +174,8 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.42)',
   },
-  fill: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 },
+  fill: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, width: '100%', height: '100%' },
   heroTitle: { color: '#fff', fontSize: 24, fontWeight: '900', zIndex: 1 },
   heroSub: { color: '#E8E8E8', marginTop: 4, zIndex: 1, fontSize: 13 },
   dots: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: 10 },
@@ -175,6 +188,7 @@ const styles = StyleSheet.create({
     width: 120,
     borderRadius: radius.lg,
     padding: 8,
+    borderWidth: StyleSheet.hairlineWidth,
     shadowOpacity: 0.1,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 3 },
