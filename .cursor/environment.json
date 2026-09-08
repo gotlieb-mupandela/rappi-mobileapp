@@ -1,11 +1,1 @@
-{
-  "name": "rappi-mobileapp",
-  "install": "npm install",
-  "terminals": [
-    {
-      "name": "expo-web",
-      "command": "npx expo start --web --port 8081"
-    }
-  ],
-  "ports": [{ "name": "expo-web", "port": 8081 }]
-}
+{"name":"rappi-mobileapp","install":"npm install","terminals":[{"name":"expo-web","command":"npx expo start --web --port 8081"}],"ports":[{"name":"expo","port":8081}]}
