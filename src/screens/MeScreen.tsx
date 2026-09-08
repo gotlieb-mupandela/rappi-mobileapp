@@ -21,7 +21,7 @@ export function MeScreen() {
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: theme.bg }} contentContainerStyle={styles.content}>
-      <BrandLogo variant="lockup" width={168} style={{ marginBottom: 18 }} />
+      <BrandLogo variant="lockup" size="footer" style={{ marginBottom: 18 }} />
 
       <View style={styles.header}>
         <View style={{ flex: 1, paddingRight: 12 }}>

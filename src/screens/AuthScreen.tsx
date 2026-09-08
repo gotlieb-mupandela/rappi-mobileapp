@@ -16,7 +16,7 @@ export function AuthScreen() {
     <View style={{ flex: 1, backgroundColor: theme.bg }}>
       <ScreenHeader title="Sign in" />
       <View style={styles.body}>
-        <BrandLogo variant="lockup" width={200} />
+        <BrandLogo variant="lockup" size="footer" />
         <Text style={[styles.h1, { color: theme.text }]}>Sign in</Text>
         <Text style={{ color: theme.muted, marginTop: 6, textAlign: 'center' }}>
           Demo shop login. Guests can browse and check out without an account.

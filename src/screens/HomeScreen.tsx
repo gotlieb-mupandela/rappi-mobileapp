@@ -51,7 +51,9 @@ export function HomeScreen() {
       keyboardDismissMode="on-drag"
       testID="home-scroll"
     >
-      <BrandLogo variant="lockup" width={236} style={styles.logo} />
+      <View style={styles.header} testID="home-header">
+        <BrandLogo variant="lockup" size="header" />
+      </View>
 
       <SearchBar value={q} onChange={setQ} onSubmit={() => openSearch(q.trim())} />
 
@@ -158,8 +160,15 @@ export function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  content: { padding: 16, paddingBottom: 36 },
-  logo: { marginBottom: 16 },
+  content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 36 },
+  header: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 76,
+    marginBottom: 12,
+    backgroundColor: 'transparent',
+    overflow: 'visible',
+  },
   heroPager: { marginTop: 16, height: 168, borderRadius: radius.xl, overflow: 'hidden' },
   hero: {
     height: 168,

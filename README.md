@@ -79,4 +79,4 @@ assets/brand/           # Official RAPPI lockup, mark, banner
 
 ## Brand
 
-Neon lime on black lockup from the website (`assets/brand/rappi-logo.png` RGBA + `rappi-mark.png`), rendered with `resizeMode="contain"` on a transparent background — no opaque plate. Default theme is dark `#0B0B0B` with lime `#B6FF00`. The in-app layout follows a clean commerce pattern (search, carousel, two-column cards, bottom tabs).
+Official lockup (`assets/brand/rappi-logo.png` RGBA) matches the website header: **height-driven** (`h-[4.25rem]` / `sm:h-[4.75rem]`, footer `h-24`), `resizeMode="contain"`, `w-auto`, and a soft green **drop-shadow** (`rgba(94,255,56,0.16)`) — not blend modes, not an opaque plate. Default theme is dark `#0B0B0B` with lime `#B6FF00`. The in-app layout follows a clean commerce pattern (search, carousel, two-column cards, bottom tabs).
