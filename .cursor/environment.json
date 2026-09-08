@@ -7,5 +7,5 @@
       "command": "npx expo start --web --port 8081"
     }
   ],
-  "ports": [8081]
+  "ports": [{ "name": "expo-web", "port": 8081 }]
 }
