@@ -73,10 +73,12 @@ function ToastHost() {
   if (!toast) return null;
   return (
     <View
-      pointerEvents="none"
       style={[
         styles.toast,
-        { backgroundColor: toast.kind === 'err' ? theme.danger : theme.text },
+        {
+          backgroundColor: toast.kind === 'err' ? theme.danger : theme.text,
+          pointerEvents: 'none',
+        },
       ]}
     >
       <Text style={{ color: toast.kind === 'err' ? '#fff' : theme.bg, fontWeight: '800' }}>{toast.text}</Text>
