@@ -1,8 +1,9 @@
 import { StatusBar } from 'expo-status-bar';
-import { Platform, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
 import { TabBar } from './src/components/TabBar';
 import { StoreProvider, useStore } from './src/store';
 import { PHONE_WIDTH } from './src/theme';
+import { useAppInsets } from './src/useInsets';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { CategoryScreen } from './src/screens/CategoryScreen';
 import { CategoryHubScreen } from './src/screens/CategoryHubScreen';
@@ -88,18 +89,33 @@ function ToastHost() {
 
 function Shell() {
   const { theme, themeName, current } = useStore();
+  const insets = useAppInsets();
   const showTabs = current.key === 'tabs';
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: Platform.OS === 'web' ? '#111' : theme.bg }]}>
+    <View
+      style={[
+        styles.safe,
+        {
+          backgroundColor: Platform.OS === 'web' ? '#111' : theme.bg,
+          paddingTop: insets.top,
+        },
+      ]}
+    >
       <StatusBar style={themeName === 'dark' ? 'light' : 'dark'} />
-      <View style={[styles.frame, { backgroundColor: theme.bg }]}>
-        <View style={styles.body}>
-          <StackBody />
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        enabled={Platform.OS === 'ios'}
+      >
+        <View style={[styles.frame, { backgroundColor: theme.bg }]}>
+          <View style={styles.body}>
+            <StackBody />
+          </View>
+          {showTabs ? <TabBar /> : null}
+          <ToastHost />
         </View>
-        {showTabs ? <TabBar /> : null}
-        <ToastHost />
-      </View>
-    </SafeAreaView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
@@ -113,6 +129,7 @@ export default function App() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
+  flex: { flex: 1 },
   frame: {
     flex: 1,
     width: '100%',
@@ -125,7 +142,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 16,
     right: 16,
-    bottom: 88,
+    bottom: 96,
     borderRadius: 14,
     paddingVertical: 12,
     paddingHorizontal: 16,

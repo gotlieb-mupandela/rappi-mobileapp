@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { AUDIENCES, CATEGORIES } from '../catalog';
+import { hapticTap } from '../haptics';
 import { categoryCounts, sampleForCategory } from '../products';
 import { ProductImage } from '../components/ProductImage';
 import { useStore } from '../store';
@@ -23,8 +24,14 @@ export function CategoryScreen() {
         {AUDIENCES.map((a) => (
           <Pressable
             key={a.slug}
-            onPress={() => push({ key: 'search', audience: a.slug })}
-            style={[styles.aud, { backgroundColor: theme.surface }]}
+            onPress={() => {
+              hapticTap();
+              push({ key: 'search', audience: a.slug });
+            }}
+            style={({ pressed }) => [
+              styles.aud,
+              { backgroundColor: theme.surface, borderColor: theme.border, opacity: pressed ? 0.85 : 1 },
+            ]}
             testID={`audience-${a.slug}`}
           >
             <Text style={[styles.audName, { color: theme.text }]}>{a.name}</Text>
@@ -38,11 +45,17 @@ export function CategoryScreen() {
           return (
             <Pressable
               key={c.slug}
-              onPress={() => push({ key: 'categoryHub', slug: c.slug })}
-              style={[styles.tile, { backgroundColor: theme.surface, shadowColor: theme.shadow }]}
+              onPress={() => {
+                hapticTap();
+                push({ key: 'categoryHub', slug: c.slug });
+              }}
+              style={({ pressed }) => [
+                styles.tile,
+                { backgroundColor: theme.surface, borderColor: theme.border, shadowColor: theme.shadow, opacity: pressed ? 0.88 : 1 },
+              ]}
               testID={`category-${c.slug}`}
             >
-              <View style={[styles.tileImg, { backgroundColor: theme.surface2 }]}>
+              <View style={[styles.tileImg, { backgroundColor: theme.mediaBg }]}>
                 <ProductImage uri={sample?.imageUrl} height={110} />
               </View>
               <Text style={[styles.tileName, { color: theme.text }]} numberOfLines={1}>
@@ -65,7 +78,15 @@ const styles = StyleSheet.create({
   sub: { marginTop: 6, fontSize: 14, lineHeight: 20 },
   section: { marginTop: 22, fontSize: 16, fontWeight: '800' },
   row3: { flexDirection: 'row', gap: 8, marginTop: 12 },
-  aud: { flex: 1, paddingVertical: 14, borderRadius: radius.md, alignItems: 'center' },
+  aud: {
+    flex: 1,
+    paddingVertical: 14,
+    minHeight: 48,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: StyleSheet.hairlineWidth,
+  },
   audName: { fontWeight: '800' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginTop: 18 },
   tile: {
@@ -73,6 +94,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     padding: 10,
     marginBottom: 12,
+    borderWidth: StyleSheet.hairlineWidth,
     shadowOpacity: 0.1,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 3 },

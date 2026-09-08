@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   NativeScrollEvent,
   NativeSyntheticEvent,
@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { categoryBySlug, subcategoryLabel } from '../catalog';
 import { formatPrice } from '../format';
 import { getAssortment } from '../assortment';
+import { hapticSuccess, hapticTap } from '../haptics';
 import { getProduct } from '../products';
 import {
   buyableSizes,
@@ -26,14 +27,15 @@ import {
 import { ProductImage } from '../components/ProductImage';
 import { QtyStepper } from '../components/QtyStepper';
 import { ScreenHeader } from '../components/ScreenHeader';
+import { StickyCta } from '../components/StickyCta';
 import { useStore } from '../store';
-import { radius } from '../theme';
+import { PHONE_WIDTH, radius } from '../theme';
 
 export function ProductScreen({ code }: { code: string }) {
   const { theme, catalog, addToCart, showToast, isFavorite, toggleFavorite, push } = useStore();
   const product = getProduct(catalog, code);
   const { width } = useWindowDimensions();
-  const galleryWidth = Math.min(width, 430);
+  const galleryWidth = Math.min(width, PHONE_WIDTH);
 
   const buyable = product ? buyableSizes(product) : [];
   const visible = product ? pickerSizes(product) : [];
@@ -41,11 +43,19 @@ export function ProductScreen({ code }: { code: string }) {
   const [qty, setQty] = useState(1);
   const [slide, setSlide] = useState(0);
 
+  useEffect(() => {
+    if (!product) return;
+    const next = buyableSizes(product)[0]?.size ?? product.sizes[0]?.size ?? 'SKU';
+    setSize(next);
+    setQty(1);
+    setSlide(0);
+  }, [code]);
+
   const selected = product?.sizes.find((s) => s.size === size);
   const stock = selected?.stock ?? 0;
   const sold = product ? isSoldOut(product) : true;
   const assortment = product ? getAssortment(product) : null;
-  const images = useMemo(() => product?.images?.length ? product.images : product ? [product.imageUrl] : [], [product]);
+  const images = useMemo(() => (product?.images?.length ? product.images : product ? [product.imageUrl] : []), [product]);
 
   if (!product) {
     return (
@@ -69,12 +79,20 @@ export function ProductScreen({ code }: { code: string }) {
       <ScreenHeader
         title="Details"
         right={
-          <Pressable onPress={() => toggleFavorite(product.code)} accessibilityLabel="Favorite">
+          <Pressable
+            onPress={() => {
+              hapticTap();
+              toggleFavorite(product.code);
+            }}
+            hitSlop={10}
+            accessibilityLabel="Favorite"
+            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+          >
             <Ionicons name={isFavorite(product.code) ? 'heart' : 'heart-outline'} size={22} color={theme.danger} />
           </Pressable>
         }
       />
-      <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 132 }} keyboardShouldPersistTaps="handled">
         <ScrollView
           horizontal
           pagingEnabled
@@ -83,7 +101,7 @@ export function ProductScreen({ code }: { code: string }) {
           testID="pdp-gallery"
         >
           {images.map((uri, i) => (
-            <View key={`${uri}-${i}`} style={{ width: galleryWidth, height: 360, backgroundColor: theme.surface2 }}>
+            <View key={`${uri}-${i}`} style={{ width: galleryWidth, height: 360, backgroundColor: theme.mediaBg }}>
               <ProductImage uri={uri} height={360} radius={0} />
             </View>
           ))}
@@ -110,7 +128,9 @@ export function ProductScreen({ code }: { code: string }) {
               {assortment.pairHint ? ` · ${assortment.pairHint}` : ''}
             </Text>
           ) : null}
-          <Text style={{ color: theme.muted, marginTop: 6 }}>{stockLabel(product)}</Text>
+          <Text style={{ color: sold ? theme.danger : theme.muted, marginTop: 6, fontWeight: '700' }}>
+            {stockLabel(product)}
+          </Text>
 
           {hasVisibleSizePicker(product) ? (
             <View style={{ marginTop: 18 }}>
@@ -123,15 +143,16 @@ export function ProductScreen({ code }: { code: string }) {
                       key={row.size}
                       disabled={row.stock === 0}
                       onPress={() => {
+                        hapticTap();
                         setSize(row.size);
                         setQty(1);
                       }}
-                      style={[
+                      style={({ pressed }) => [
                         styles.size,
                         {
                           borderColor: active ? theme.accent : theme.borderStrong,
                           backgroundColor: active ? theme.accent : theme.surface,
-                          opacity: row.stock === 0 ? 0.35 : 1,
+                          opacity: row.stock === 0 ? 0.35 : pressed ? 0.8 : 1,
                         },
                       ]}
                       testID={`size-${row.size}`}
@@ -164,7 +185,14 @@ export function ProductScreen({ code }: { code: string }) {
 
           <Text style={[styles.desc, { color: theme.textSecondary }]}>{product.description}</Text>
 
-          <Pressable onPress={() => push({ key: 'categoryHub', slug: product.category })}>
+          <Pressable
+            onPress={() => {
+              hapticTap();
+              push({ key: 'categoryHub', slug: product.category });
+            }}
+            hitSlop={8}
+            style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+          >
             <Text style={{ color: theme.accent, fontWeight: '700', marginTop: 8 }}>
               More in {cat?.name} ›
             </Text>
@@ -172,16 +200,21 @@ export function ProductScreen({ code }: { code: string }) {
         </View>
       </ScrollView>
 
-      <View style={[styles.ctaBar, { backgroundColor: theme.chrome, borderTopColor: theme.border }]}>
+      <StickyCta>
         <Pressable
           disabled={sold || stock <= 0}
           onPress={() => {
             const result = addToCart(product.code, size, qty);
+            if (result.ok) hapticSuccess();
+            else hapticTap();
             showToast(result.ok ? 'ok' : 'err', result.message);
           }}
-          style={[
+          style={({ pressed }) => [
             styles.cta,
-            { backgroundColor: sold || stock <= 0 ? theme.muted2 : theme.accent, opacity: sold ? 0.6 : 1 },
+            {
+              backgroundColor: sold || stock <= 0 ? theme.muted2 : theme.accent,
+              opacity: sold ? 0.6 : pressed ? 0.88 : 1,
+            },
           ]}
           testID="add-to-cart"
         >
@@ -189,7 +222,7 @@ export function ProductScreen({ code }: { code: string }) {
             {sold ? 'Sold out' : `Add to cart · ${formatPrice(product.price * qty)}`}
           </Text>
         </Pressable>
-      </View>
+      </StickyCta>
     </View>
   );
 }
@@ -200,11 +233,18 @@ const styles = StyleSheet.create({
   kicker: { fontSize: 11, fontWeight: '800', letterSpacing: 1.4, textTransform: 'uppercase' },
   title: { fontSize: 24, fontWeight: '900', marginTop: 8, lineHeight: 28 },
   code: { marginTop: 6, fontSize: 12, letterSpacing: 1.2, fontVariant: ['tabular-nums'] },
-  price: { fontSize: 22, fontWeight: '800', marginTop: 12 },
+  price: { fontSize: 24, fontWeight: '800', marginTop: 12, fontVariant: ['tabular-nums'], letterSpacing: -0.4 },
   label: { fontSize: 11, fontWeight: '800', letterSpacing: 1.4, textTransform: 'uppercase', marginBottom: 8 },
   sizes: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  size: { minHeight: 40, minWidth: 44, paddingHorizontal: 12, borderRadius: radius.pill, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+  size: {
+    minHeight: 44,
+    minWidth: 44,
+    paddingHorizontal: 12,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   desc: { marginTop: 20, fontSize: 14, lineHeight: 22 },
-  ctaBar: { position: 'absolute', left: 0, right: 0, bottom: 0, padding: 12, borderTopWidth: StyleSheet.hairlineWidth },
-  cta: { borderRadius: radius.lg, paddingVertical: 14, alignItems: 'center' },
+  cta: { borderRadius: radius.lg, paddingVertical: 15, minHeight: 52, alignItems: 'center', justifyContent: 'center' },
 });
