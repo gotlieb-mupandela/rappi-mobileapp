@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "RAPPI Sports Hub",
+    "slug": "rappi-sports-hub",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#050505"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.rappi.sportshub"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#050505",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "package": "com.rappi.sportshub",
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "name": "RAPPI Sports Hub",
+      "shortName": "RAPPI",
+      "themeColor": "#1DB954",
+      "backgroundColor": "#F4F5F2"
+    },
+    "plugins": [],
+    "extra": {
+      "catalogSource": "https://github.com/gotlieb-mupandela/rappi-webapp",
+      "storefront": "https://rappi-two.vercel.app"
+    }
+  }
+}
