@@ -1,0 +1,17 @@
+{
+  "name": "rappi-mobileapp",
+  "install": "npm install",
+  "terminals": [
+    {
+      "name": "expo-web",
+      "command": "npx expo start --web --port 8081",
+      "description": "Expo web dev server for RAPPI Sports Hub"
+    }
+  ],
+  "ports": [
+    {
+      "name": "expo",
+      "port": 8081
+    }
+  ]
+}
