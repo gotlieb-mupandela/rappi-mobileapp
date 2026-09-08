@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ProductCard } from '../components/ProductCard';
+import { EmptyState, EmptyWrap } from '../components/EmptyState';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { getProduct } from '../products';
 import { useStore } from '../store';
@@ -13,11 +14,11 @@ export function FavoritesScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg }}>
       <ScreenHeader title="Favorites" />
-      <ScrollView contentContainerStyle={styles.grid}>
+      <ScrollView contentContainerStyle={products.length ? styles.grid : { flexGrow: 1, justifyContent: 'center' }}>
         {!products.length ? (
-          <Text style={{ color: theme.muted, textAlign: 'center', width: '100%', marginTop: 40 }}>
-            Heart a product to save it here.
-          </Text>
+          <EmptyWrap>
+            <EmptyState icon="heart-outline" title="No favorites yet" body="Heart a product to save it here." />
+          </EmptyWrap>
         ) : (
           products.map((p) => (p ? <ProductCard key={p.code} product={p} onPress={() => openProduct(p.code)} /> : null))
         )}

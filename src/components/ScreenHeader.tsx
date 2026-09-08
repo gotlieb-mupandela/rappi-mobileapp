@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useStore } from '../store';
+import { hapticTap } from '../haptics';
 
 export function ScreenHeader({
   title,
@@ -14,12 +15,16 @@ export function ScreenHeader({
 }) {
   const { theme, pop } = useStore();
   return (
-    <View style={[styles.row, { borderBottomColor: theme.border }]}>
+    <View style={[styles.row, { borderBottomColor: theme.border, backgroundColor: theme.headerBg }]}>
       <Pressable
-        onPress={onBack ?? pop}
-        hitSlop={10}
-        style={styles.back}
+        onPress={() => {
+          hapticTap();
+          (onBack ?? pop)();
+        }}
+        hitSlop={12}
+        style={({ pressed }) => [styles.back, { opacity: pressed ? 0.6 : 1 }]}
         accessibilityLabel="Back"
+        accessibilityRole="button"
         testID="nav-back"
       >
         <Ionicons name="chevron-back" size={24} color={theme.text} />
@@ -37,11 +42,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 8,
-    paddingVertical: 10,
+    paddingVertical: 8,
     borderBottomWidth: StyleSheet.hairlineWidth,
     minHeight: 52,
   },
-  back: { width: 40, alignItems: 'center' },
+  back: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   title: { flex: 1, textAlign: 'center', fontSize: 17, fontWeight: '800' },
-  right: { width: 40, alignItems: 'center' },
+  right: { width: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
 });

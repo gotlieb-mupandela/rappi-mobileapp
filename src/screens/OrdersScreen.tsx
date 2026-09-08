@@ -1,5 +1,6 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { formatDate, formatPrice } from '../format';
+import { EmptyState } from '../components/EmptyState';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { useStore } from '../store';
 import { radius } from '../theme';
@@ -13,9 +14,7 @@ export function OrdersScreen({ focusId }: { focusId?: string }) {
       <ScreenHeader title={focusId ? 'Order' : 'Orders'} />
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         {!list.length ? (
-          <Text style={{ color: theme.muted, textAlign: 'center', marginTop: 40 }}>
-            No orders yet. Guest checkout is enabled.
-          </Text>
+          <EmptyState icon="receipt-outline" title="No orders yet" body="Guest checkout is enabled — add a piece and check out." />
         ) : (
           list.map((o) => (
             <Pressable

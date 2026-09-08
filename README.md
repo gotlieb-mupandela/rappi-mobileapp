@@ -6,7 +6,7 @@ This is the companion app to the storefront at [rappi-two.vercel.app](https://ra
 
 ## Features
 
-- **Shop** — RAPPI lockup, search, hero carousel, category hubs, New Arrivals grid
+- **Shop** — website-identical RAPPI lockup (transparent, object-contain), search, hero carousel, category hubs, New Arrivals grid
 - **Category** — Men / Women / Kids plus live sport hubs with piece counts
 - **Search** — name, SKU code, or category; **paginated** (24 / page) with category chips
 - **PDP** — photo gallery, sizes, live stock (low stock &lt; 5), wholesale assortment labels, add to cart
@@ -79,4 +79,4 @@ assets/brand/           # Official RAPPI lockup, mark, banner
 
 ## Brand
 
-Neon lime on black lockup (`assets/brand/rappi-logo.png` + `rappi-mark.png`). The in-app layout follows a clean commerce pattern (search, carousel, two-column cards, bottom tabs) with RAPPI green — not third-party furniture branding.
+Official lockup (`assets/brand/rappi-logo.png` RGBA) matches the website header: **height-driven** (`h-[4.25rem]` / `sm:h-[4.75rem]`, footer `h-24`), `resizeMode="contain"`, `w-auto`, and a soft green **drop-shadow** (`rgba(94,255,56,0.16)`) — not blend modes, not an opaque plate. Default theme is dark `#0B0B0B` with lime `#B6FF00`. The in-app layout follows a clean commerce pattern (search, carousel, two-column cards, bottom tabs).

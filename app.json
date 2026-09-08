@@ -7,9 +7,9 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/brand/rappi-logo.png",
       "resizeMode": "contain",
-      "backgroundColor": "#050505"
+      "backgroundColor": "#0B0B0B"
     },
     "ios": {
       "supportsTablet": true,
@@ -17,7 +17,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#050505",
+        "backgroundColor": "#0B0B0B",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -30,8 +30,8 @@
       "bundler": "metro",
       "name": "RAPPI Sports Hub",
       "shortName": "RAPPI",
-      "themeColor": "#1DB954",
-      "backgroundColor": "#F4F5F2"
+      "themeColor": "#B6FF00",
+      "backgroundColor": "#0B0B0B"
     },
     "plugins": [],
     "extra": {

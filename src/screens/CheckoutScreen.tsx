@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SHIPPING_METHODS } from '../catalog';
 import { formatPrice } from '../format';
+import { hapticSuccess, hapticTap } from '../haptics';
 import { getProduct } from '../products';
 import { ScreenHeader } from '../components/ScreenHeader';
+import { StickyCta } from '../components/StickyCta';
 import { useStore } from '../store';
 import { radius } from '../theme';
 
@@ -36,8 +38,12 @@ export function CheckoutScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg }}>
       <ScreenHeader title="Checkout" />
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
-        <Text style={{ color: theme.muted, marginBottom: 16 }}>
+      <ScrollView
+        contentContainerStyle={{ padding: 16, paddingBottom: 140 }}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+      >
+        <Text style={{ color: theme.muted, marginBottom: 16, lineHeight: 20 }}>
           Guest checkout is enabled. Shipping: Standard N$100, Express N$150, Hub pickup free.
         </Text>
         {field('Full name', name, setName, { autoComplete: 'name', testID: 'co-name' })}
@@ -52,25 +58,36 @@ export function CheckoutScreen() {
           return (
             <Pressable
               key={m.id}
-              onPress={() => setMethod(m.id)}
-              style={[
+              onPress={() => {
+                hapticTap();
+                setMethod(m.id);
+              }}
+              style={({ pressed }) => [
                 styles.ship,
                 {
                   borderColor: active ? theme.accent : theme.border,
-                  backgroundColor: theme.surface,
+                  backgroundColor: active ? theme.accentMuted : theme.surface,
+                  opacity: pressed ? 0.86 : 1,
                 },
               ]}
               testID={`ship-${m.id}`}
             >
-              <Text style={{ color: theme.text, fontWeight: '700' }}>{m.name}</Text>
-              <Text style={{ color: theme.text, fontWeight: '800' }}>{m.cost ? formatPrice(m.cost) : 'Free'}</Text>
+              <View style={{ flex: 1, paddingRight: 12 }}>
+                <Text style={{ color: theme.text, fontWeight: '700' }}>{m.name}</Text>
+                <Text style={{ color: theme.muted, fontSize: 12, marginTop: 2 }}>
+                  {m.id === 'pickup' ? 'Collect at the RAPPI hub' : m.id === 'express' ? 'Faster delivery' : 'Namibia-wide'}
+                </Text>
+              </View>
+              <Text style={{ color: theme.text, fontWeight: '800', fontVariant: ['tabular-nums'] }}>
+                {m.cost ? formatPrice(m.cost) : 'Free'}
+              </Text>
             </Pressable>
           );
         })}
 
         {field('Notes (optional)', notes, setNotes)}
 
-        <View style={[styles.summary, { backgroundColor: theme.surface }]}>
+        <View style={[styles.summary, { backgroundColor: theme.surface, borderColor: theme.border }]}>
           {lines.map((l) => {
             const p = getProduct(catalog, l.code);
             if (!p) return null;
@@ -79,24 +96,29 @@ export function CheckoutScreen() {
                 <Text style={{ color: theme.text, flex: 1 }} numberOfLines={1}>
                   {p.displayName} × {l.qty}
                 </Text>
-                <Text style={{ color: theme.text }}>{formatPrice(p.price * l.qty)}</Text>
+                <Text style={{ color: theme.text, fontVariant: ['tabular-nums'] }}>{formatPrice(p.price * l.qty)}</Text>
               </View>
             );
           })}
           <View style={styles.sumRow}>
             <Text style={{ color: theme.muted }}>Subtotal</Text>
-            <Text style={{ color: theme.text }}>{formatPrice(cartSubtotal)}</Text>
+            <Text style={{ color: theme.text, fontVariant: ['tabular-nums'] }}>{formatPrice(cartSubtotal)}</Text>
           </View>
           <View style={styles.sumRow}>
             <Text style={{ color: theme.muted }}>Shipping</Text>
-            <Text style={{ color: theme.text }}>{shipping.cost ? formatPrice(shipping.cost) : 'Free'}</Text>
+            <Text style={{ color: theme.text, fontVariant: ['tabular-nums'] }}>
+              {shipping.cost ? formatPrice(shipping.cost) : 'Free'}
+            </Text>
           </View>
           <View style={styles.sumRow}>
             <Text style={{ color: theme.text, fontWeight: '900', fontSize: 16 }}>Total</Text>
-            <Text style={{ color: theme.text, fontWeight: '900', fontSize: 16 }}>{formatPrice(total)}</Text>
+            <Text style={{ color: theme.text, fontWeight: '900', fontSize: 16, fontVariant: ['tabular-nums'] }}>
+              {formatPrice(total)}
+            </Text>
           </View>
         </View>
-
+      </ScrollView>
+      <StickyCta>
         <Pressable
           onPress={() => {
             const result = placeOrder({
@@ -109,36 +131,40 @@ export function CheckoutScreen() {
               notes,
             });
             if (!result.ok) {
+              hapticTap();
               showToast('err', result.message);
               return;
             }
+            hapticSuccess();
             showToast('ok', 'Order placed.');
             push({ key: 'confirmation', orderId: result.order.id });
           }}
-          style={[styles.cta, { backgroundColor: theme.accent }]}
+          style={({ pressed }) => [styles.cta, { backgroundColor: theme.accent, opacity: pressed ? 0.88 : 1 }]}
           testID="place-order"
         >
           <Text style={{ color: theme.onAccent, fontWeight: '900', fontSize: 16 }}>
             Place order · {formatPrice(total)}
           </Text>
         </Pressable>
-      </ScrollView>
+      </StickyCta>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   label: { fontSize: 12, fontWeight: '800', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.6 },
-  input: { borderWidth: 1, borderRadius: radius.md, paddingHorizontal: 12, paddingVertical: 12, fontSize: 15 },
+  input: { borderWidth: 1, borderRadius: radius.md, paddingHorizontal: 12, paddingVertical: 12, fontSize: 15, minHeight: 48 },
   ship: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     padding: 14,
     borderRadius: radius.md,
     borderWidth: 1.5,
     marginBottom: 8,
+    minHeight: 64,
   },
-  summary: { borderRadius: radius.lg, padding: 14, marginTop: 8 },
-  sumRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 8, paddingVertical: 4 },
-  cta: { marginTop: 18, borderRadius: radius.lg, paddingVertical: 16, alignItems: 'center' },
+  summary: { borderRadius: radius.lg, padding: 14, marginTop: 8, borderWidth: StyleSheet.hairlineWidth },
+  sumRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 8, paddingVertical: 6, alignItems: 'center' },
+  cta: { borderRadius: radius.lg, paddingVertical: 16, minHeight: 52, alignItems: 'center', justifyContent: 'center' },
 });

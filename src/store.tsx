@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -86,7 +87,7 @@ type StoreValue = {
 const StoreContext = createContext<StoreValue | null>(null);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [themeName, setThemeNameState] = useState<ThemeName>('light');
+  const [themeName, setThemeNameState] = useState<ThemeName>('dark');
   const [catalog, setCatalog] = useState<Product[]>(() => featuredCatalog());
   const [catalogReady, setCatalogReady] = useState(false);
   const [catalogError, setCatalogError] = useState<string | null>(null);
@@ -99,6 +100,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [notify, setNotifyState] = useState(true);
   const [toast, setToast] = useState<Toast>(null);
+  const [hydrated, setHydrated] = useState(false);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -121,6 +124,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setFavorites(savedFav);
       setAddresses(savedAddr);
       setNotifyState(savedNotify);
+      setHydrated(true);
       try {
         const full = await loadCatalog();
         if (!cancelled) {
@@ -140,31 +144,46 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (!hydrated) return;
     void storage.saveCart(lines);
-  }, [lines]);
+  }, [lines, hydrated]);
   useEffect(() => {
+    if (!hydrated) return;
     void storage.saveUser(user);
-  }, [user]);
+  }, [user, hydrated]);
   useEffect(() => {
+    if (!hydrated) return;
     void storage.saveOrders(orders);
-  }, [orders]);
+  }, [orders, hydrated]);
   useEffect(() => {
+    if (!hydrated) return;
     void storage.saveFavorites(favorites);
-  }, [favorites]);
+  }, [favorites, hydrated]);
   useEffect(() => {
+    if (!hydrated) return;
     void storage.saveAddresses(addresses);
-  }, [addresses]);
+  }, [addresses, hydrated]);
   useEffect(() => {
+    if (!hydrated) return;
     void storage.saveTheme(themeName);
-  }, [themeName]);
+  }, [themeName, hydrated]);
   useEffect(() => {
+    if (!hydrated) return;
     void storage.saveNotify(notify);
-  }, [notify]);
+  }, [notify, hydrated]);
 
   const showToast = useCallback((kind: 'ok' | 'err', text: string) => {
     setToast({ kind, text });
-    setTimeout(() => setToast(null), 2400);
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 2400);
   }, []);
+
+  useEffect(
+    () => () => {
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+    },
+    [],
+  );
 
   const current = stack[stack.length - 1] ?? { key: 'tabs' as const };
 

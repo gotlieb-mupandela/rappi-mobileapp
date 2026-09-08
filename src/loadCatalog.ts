@@ -29,8 +29,9 @@ export async function loadCatalog(): Promise<Product[]> {
   })();
   try {
     return await loading;
-  } finally {
-    loading = cached ? null : loading;
+  } catch (err) {
+    loading = null;
+    throw err;
   }
 }
 
